@@ -3,7 +3,7 @@ export AUTO_NOTIFY_VERSION="0.8.0"
 # Time it takes for a notification to expire
 export AUTO_NOTIFY_EXPIRE_TIME=8000
 # Threshold in seconds for when to automatically show a notification
-export AUTO_NOTIFY_THRESHOLD=10
+export AUTO_NOTIFY_THRESHOLD=3
 # List of commands/programs to ignore sending notifications for
 AUTO_NOTIFY_IGNORE=(
     "vim" "nvim" "less" "more" "man" "tig" "watch" "git commit" "top" "htop" "ssh" "nano"
@@ -24,7 +24,6 @@ function _auto_notify_message() {
     local command="$1"
     local elapsed="$2"
     local exit_code="$3"
-    local platform="$(uname)"
     # Run using echo -e in order to make sure notify-send picks up new line
     local DEFAULT_TITLE="\"%command\" Completed"
     local DEFAULT_BODY="$(echo -e "Total time: %elapsed seconds\nExit code: %exit_code")"
@@ -35,7 +34,7 @@ function _auto_notify_message() {
     title="$(_auto_notify_format "$title" "$command" "$elapsed" "$exit_code")"
     body="$(_auto_notify_format "$text" "$command" "$elapsed" "$exit_code")"
 
-    # todo do something
+    # TODO do something
     echo "$title" "$body"
 }
 
@@ -80,17 +79,11 @@ function _auto_notify_send() {
     # Immediately store the exit code before it goes away
     local exit_code="$?"
 
-    if [[ -z "$AUTO_COMMAND" && -z "$AUTO_COMMAND_START" ]]; then
-        return
-    fi
+    local current="$(date +"%s")"
+    let "elapsed = current - AUTO_COMMAND_START"
 
-    if [[ "$(_is_auto_notify_ignored "$AUTO_COMMAND_FULL")" == "no" ]]; then
-        local current="$(date +"%s")"
-        let "elapsed = current - AUTO_COMMAND_START"
-
-        if [[ $elapsed -gt $AUTO_NOTIFY_THRESHOLD ]]; then
-            _auto_notify_message "$AUTO_COMMAND" "$elapsed" "$exit_code"
-        fi
+    if [[ $elapsed -gt $AUTO_NOTIFY_THRESHOLD ]]; then
+        _auto_notify_message "$AUTO_COMMAND" "$elapsed" "$exit_code"
     fi
 
     # Empty tracking so that notifications are not
@@ -130,4 +123,3 @@ function enable_auto_notify() {
 _auto_notify_reset_tracking
 
 enable_auto_notify
-
