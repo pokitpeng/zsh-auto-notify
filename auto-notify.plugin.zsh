@@ -34,6 +34,10 @@ function _auto_notify_message() {
     title="$(_auto_notify_format "$title" "$command" "$elapsed" "$exit_code")"
     body="$(_auto_notify_format "$text" "$command" "$elapsed" "$exit_code")"
 
+    if [[ -z "$1"  ]]; then
+        return
+    fi
+    
     # TODO do something
     echo "$title" "$body"
 }
