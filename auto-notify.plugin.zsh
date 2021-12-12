@@ -5,7 +5,7 @@ export AUTO_NOTIFY_EXPIRE_TIME=8000
 # Threshold in seconds for when to automatically show a notification
 export AUTO_NOTIFY_THRESHOLD=10
 # List of commands/programs to ignore sending notifications for
-export AUTO_NOTIFY_IGNORE=(
+AUTO_NOTIFY_IGNORE=(
     "vim" "nvim" "less" "more" "man" "tig" "watch" "git commit" "top" "htop" "ssh" "nano"
 )
 
@@ -35,22 +35,8 @@ function _auto_notify_message() {
     title="$(_auto_notify_format "$title" "$command" "$elapsed" "$exit_code")"
     body="$(_auto_notify_format "$text" "$command" "$elapsed" "$exit_code")"
 
-    if [[ "$platform" == "Linux" ]]; then
-        local urgency="normal"
-        if [[ "$exit_code" != "0" ]]; then
-            urgency="critical"
-        fi
-        notify-send "$title" "$body" --app-name=zsh "--urgency=$urgency" "--expire-time=$AUTO_NOTIFY_EXPIRE_TIME"
-    elif [[ "$platform" == "Darwin" ]]; then
-        osascript \
-          -e 'on run argv' \
-          -e 'display notification (item 1 of argv) with title (item 2 of argv)' \
-          -e 'end run' \
-          "$body" "$title"
-    else
-        printf "Unknown platform for sending notifications: $platform\n"
-        printf "Please post an issue on gitub.com/MichaelAquilina/zsh-auto-notify/issues/\n"
-    fi
+    # todo do something
+    echo "$title" "$body"
 }
 
 function _is_auto_notify_ignored() {
@@ -143,11 +129,5 @@ function enable_auto_notify() {
 
 _auto_notify_reset_tracking
 
+enable_auto_notify
 
-platform="$(uname)"
-if [[ "$platform" == "Linux" ]] && ! type notify-send > /dev/null; then
-    printf "'notify-send' must be installed for zsh-auto-notify to work\n"
-    printf "Please install it with your relevant package manager\n"
-else
-    enable_auto_notify
-fi
