@@ -37,8 +37,9 @@ function _auto_notify_message() {
     if [[ -z "$1"  ]]; then
         return
     fi
-    
+
     # TODO do something
+    echo -e "\a"
     echo "$title" "$body"
 }
 
